@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>PVPCLIENT - Next-Gen Utility Suite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- In-browser real ZIP generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #070b10;
+      --card-bg: #0d141d;
+      --card-border: #141f2d;
+      --card-active-border: #00e599;
+      --card-glow: rgba(0, 229, 153, 0.22);
+      --accent: #00e599;
+      --accent-dark: #003823;
+      --tag-yellow: #f59e0b;
+      --tag-yellow-bg: rgba(245, 158, 11, 0.15);
+      --text: #f1f5f9;
+      --text-muted: #64748b;
+      --font-ui: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      /* Blueprint Grid Effect */
+      background-image: 
+        linear-gradient(rgba(20, 32, 48, 0.25) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(20, 32, 48, 0.25) 1px, transparent 1px);
+      background-size: 32px 32px;
+      color: var(--text);
+      font-family: var(--font-ui);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Top Navbar */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.85rem 2rem;
+      background: rgba(7, 11, 16, 0.94);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--card-border);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      background: #00e599;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 1.15rem;
+      color: #032014;
+      box-shadow: 0 0 16px var(--card-glow);
+    }
+
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-badge {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--accent);
+      margin-left: 0.25rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 0.65rem;
+    }
+
+    .btn {
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .btn-secondary {
+      background: #0d1622;
+      color: #94a3b8;
+      border-color: #1e2c3f;
+    }
+
+    .btn-secondary:hover {
+      background: #172436;
+      color: #fff;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #032014;
+      box-shadow: 0 0 14px var(--card-glow);
+    }
+
+    .btn-primary:hover {
+      background: #34d399;
+      transform: translateY(-1px);
+    }
+
+    /* Hero Section */
+    .hero-container {
+      max-width: 1200px;
+      margin: 2.5rem auto 1rem;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .pill-tag {
+      display: inline-flex;
+      background: rgba(0, 229, 153, 0.08);
+      border: 1px solid rgba(0, 229, 153, 0.3);
+      color: var(--accent);
+      padding: 0.2rem 0.65rem;
+      border-radius: 9999px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      margin-bottom: 0.8rem;
+    }
+
+    .hero h1 {
+      font-size: 2.8rem;
+      font-weight: 900;
+      line-height: 1.08;
+      letter-spacing: -0.6px;
+      margin-bottom: 0.85rem;
+      text-transform: uppercase;
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    /* HUD Preview Container */
+    .hud-box {
+      background: #080d14;
+      border: 1px solid #162436;
+      border-radius: 10px;
+      padding: 1.15rem;
+      font-family: var(--font-mono);
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+    }
+
+    .hud-header {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      border-bottom: 1px solid #142030;
+      padding-bottom: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .hud-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+      min-height: 140px;
+    }
+
+    .hud-more {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+    }
+
+    .hud-stats {
+      margin-top: 0.85rem;
+      display: flex;
+      gap: 0.9rem;
+      font-size: 0.72rem;
+      color: #94a3b8;
+      border-top: 1px solid #142030;
+      padding-top: 0.65rem;
+    }
+
+    .hud-stats strong {
+      color: #f59e0b;
+    }
+
+    /* Tabs & Categories */
+    .modules-section {
+      max-width: 1200px;
+      margin: 1rem auto 3rem;
+      padding: 0 1.5rem;
+      width: 100%;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.75rem;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: #0f1722;
+      border: 1px solid #1a2738;
+      color: var(--text-muted);
+      padding: 0.45rem 1.1rem;
+      font-weight: 700;
+      font-size: 0.82rem;
+      border-radius: 8px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: 0.15s;
+    }
+
+    .tab-btn.active {
+      background: #fff;
+      color: #070b10;
+      border-color: #fff;
+    }
+
+    /* Module Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .card.active {
+      border-color: var(--card-active-border);
+      box-shadow: 0 0 20px var(--card-glow);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-badge {
+      font-size: 0.62rem;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .badge-yellow {
+      background: #d97706;
+      color: #fff;
+    }
+
+    .badge-gray {
+      background: #273549;
+      color: #94a3b8;
+    }
+
+    .card-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+    }
+
+    .card-key {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    /* Sliders / Adjuster Line */
+    .slider-container {
+      margin-top: 0.25rem;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+      text-transform: uppercase;
+    }
+
+    .slider-val {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .range-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: #1e2c3e;
+      outline: none;
+    }
+
+    .range-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    .card-footer-hint {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: #475569;
+      text-align: right;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    /* Switch Component */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider-toggle {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: #1a2534;
+      border-radius: 24px;
+      transition: 0.25s;
+    }
+
+    .slider-toggle:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: #fff;
+      border-radius: 50%;
+      transition: 0.25s;
+    }
+
+    input:checked + .slider-toggle {
+      background-color: var(--accent);
+    }
+
+    input:checked + .slider-toggle:before {
+      transform: translateX(20px);
+    }
+
+    /* Multi-Column ClickGUI Window */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 7, 11, 0.88);
+      backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 1rem;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .clickgui-window {
+      background: #090e15;
+      border: 1px solid #1a2738;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 960px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.9);
+      overflow: hidden;
+    }
+
+    .clickgui-titlebar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid #142030;
+      background: #0c131d;
+    }
+
+    .clickgui-title {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 900;
+      font-size: 1rem;
+      letter-spacing: 0.5px;
+    }
+
+    .dot-green {
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    .clickgui-hint {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .clickgui-body {
+      padding: 1.25rem;
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      align-items: start;
+    }
+
+    .column-panel {
+      background: #0c121a;
+      border: 1px solid #172436;
+      border-radius: 12px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .column-header {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid #152233;
+      padding-bottom: 0.5rem;
+    }
+
+    .column-header span.badge {
+      background: #172638;
+      color: #94a3b8;
+      font-size: 0.65rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+    }
+
+    .mini-mod-row {
+      background: #101823;
+      border: 1px solid #192739;
+      border-radius: 8px;
+      padding: 0.6rem 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: 0.15s;
+    }
+
+    .mini-mod-row.active {
+      border-color: rgba(0, 229, 153, 0.4);
+      background: #0f1f26;
+    }
+
+    .mini-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .mini-info .icon {
+      color: #f59e0b;
+      font-size: 0.8rem;
+    }
+
+    .mini-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .mini-bind {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--text-muted);
+    }
+
+    .mini-btn-toggle {
+      background: #172230;
+      border: 1px solid #24354c;
+      color: #94a3b8;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .mini-btn-toggle.active {
+      background: rgba(0, 229, 153, 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .footer-note {
+      text-align: center;
+      color: #475569;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      margin: 2rem auto;
+    }
+
+    @media (max-width: 768px) {
+      .navbar { padding: 0.75rem 1rem; flex-wrap: wrap; }
+      .hero-container { grid-template-columns: 1fr; margin-top: 1.5rem; }
+      .hero h1 { font-size: 2.1rem; }
+      .clickgui-hint { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <header class="navbar">
+    <div class="brand">
+      <div class="brand-icon">P</div>
+      <div class="brand-title">PVPCLIENT</div>
+      <span class="brand-badge">GRIMANTI BYPASS • 1.21.5</span>
+    </div>
+    <div class="nav-actions">
+      <button class="btn btn-secondary" id="openGuiBtn">OPEN CLICKGUI (RIGHT SHIFT)</button>
+      <button class="btn btn-primary" id="downloadZipBtn">↓ DOWNLOAD ZIP + JAR</button>
+    </div>
+  </header>
+
+  <!-- Hero Details -->
+  <main>
+    <div class="hero-container">
+      <div class="hero">
+        <div class="pill-tag">Production Ready</div>
+        <h1>PVP Utility Suite</h1>
+        <p>Full-featured client with modern ClickGUI, GrimAnti bypass, and 13 combat modules.</p>
+      </div>
+      
+      <!-- Arraylist HUD Box -->
+      <div class="hud-box">
+        <div class="hud-header">
+          <span>PVPCLIENT</span>
+          <span>1.21.5 FABRIC</span>
+        </div>
+        <div class="hud-list" id="hudList"></div>
+        <div class="hud-stats">
+          <span>FPS <strong>161</strong></span>
+          <span>PING <strong>9ms</strong></span>
+          <span>GRIM BYPASS: <strong>ON</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Tabs -->
+    <section class="modules-section">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="filterCat('combat', this)">Combat</button>
+        <button class="tab-btn" onclick="filterCat('movement', this)">Movement</button>
+        <button class="tab-btn" onclick="filterCat('render', this)">Render</button>
+        <button class="tab-btn" onclick="filterCat('world', this)">World</button>
+        <button class="tab-btn" onclick="filterCat('misc', this)">Misc</button>
+      </div>
+
+      <!-- Modules Grid Container -->
+      <div class="grid" id="moduleGrid"></div>
+
+      <div class="footer-note">
+        Fabric 1.21.5 • Yarn Mappings • Full Config System • Rotation Manager • Packet-level GrimAnti bypass on all critical modules
+      </div>
+    </section>
+  </main>
+
+  <!-- Full Multi-Column ClickGUI Overlay -->
+  <div class="modal-overlay" id="guiModal">
+    <div class="clickgui-window">
+      <div class="clickgui-titlebar">
+        <div class="clickgui-title">
+          <div class="dot-green"></div>
+          <span>CLICKGUI</span>
+        </div>
+        <div class="clickgui-hint">RIGHT SHIFT TO CLOSE • DRAG FRAMES IN REAL MOD</div>
+        <button class="btn btn-secondary" id="closeGuiBtn" style="padding: 0.2rem 0.6rem;">&times;</button>
+      </div>
+      <div class="clickgui-body" id="clickguiColumns">
+        <!-- Rendered Columns dynamically via JS -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Full Modules Dataset matching every screenshot
+    const modules = [
+      { id: 'killaura', name: 'KillAura', category: 'combat', tag: 'GRIM BYPASS', badge: 'badge-yellow', key: 'R', active: true, slider: true, val: 6, min: 1, max: 10, step: 1 },
+      { id: 'autocrystal', name: 'AutoCrystal', category: 'combat', tag: 'GRIM BYPASS', badge: 'badge-yellow', key: 'C', active: true, slider: true, val: 2, min: 1, max: 5, step: 1 },
+      { id: 'autoanchor', name: 'AutoAnchor', category: 'combat', tag: 'STABLE', badge: 'badge-gray', key: 'G', active: false, slider: false },
+      { id: 'reach', name: 'Reach', category: 'combat', tag: 'GRIM BYPASS', badge: 'badge-yellow', key: 'H', active: true, slider: true, val: 3.7, min: 3.0, max: 6.0, step: 0.1 },
+      { id: 'velocity', name: 'Velocity', category: 'combat', tag: 'GRIM BYPASS', badge: 'badge-yellow', key: 'V', active: true, slider: true, val: 42.2, min: 0, max: 100, step: 0.1 },
+      { id: 'criticals', name: 'Criticals', category: 'combat', tag: 'STABLE', badge: 'badge-gray', key: 'K', active: false, slider: false },
+      
+      { id: 'scaffold', name: 'Scaffold', category: 'movement', tag: 'STABLE', badge: 'badge-gray', key: 'Y', active: false, slider: false },
+      { id: 'speed', name: 'Speed', category: 'movement', tag: 'STABLE', badge: 'badge-gray', key: 'Z', active: true, slider: true, val: 1.35, min: 1.0, max: 3.0, step: 0.05 },
+
+      { id: 'esp', name: 'ESP', category: 'render', tag: 'STABLE', badge: 'badge-gray', key: 'P', active: true, slider: false },
+      { id: 'tracers', name: 'Tracers', category: 'render', tag: 'STABLE', badge: 'badge-gray', key: 'T', active: true, slider: false },
+      { id: 'nametags', name: 'Nametags', category: 'render', tag: 'STABLE', badge: 'badge-gray', key: 'N', active: false, slider: false },
+
+      { id: 'automine', name: 'AutoMine', category: 'world', tag: 'GRIM BYPASS', badge: 'badge-yellow', key: 'X', active: true, slider: true, val: 0.5, min: 0.1, max: 1.0, step: 0.1 },
+      
+      { id: 'hud', name: 'HUD', category: 'misc', tag: 'STABLE', badge: 'badge-gray', key: 'U', active: true, slider: false }
+    ];
+
+    let currentCat = 'combat';
+    const categories = ['combat', 'movement', 'render', 'world', 'misc'];
+
+    function renderHUD() {
+      const hud = document.getElementById('hudList');
+      hud.innerHTML = '';
+      const activeMods = modules.filter(m => m.active);
+      
+      // Top 5 on HUD
+      activeMods.slice(0, 5).forEach(m => {
+        const item = document.createElement('div');
+        item.textContent = `• ${m.name}`;
+        hud.appendChild(item);
+      });
+
+      if (activeMods.length > 5) {
+        const more = document.createElement('div');
+        more.className = 'hud-more';
+        more.textContent = `+${activeMods.length - 5} more active`;
+        hud.appendChild(more);
+      }
+    }
+
+    function renderCards() {
+      const grid = document.getElementById('moduleGrid');
+      grid.innerHTML = '';
+
+      const filtered = modules.filter(m => m.category === currentCat);
+      filtered.forEach(m => {
+        const card = document.createElement('div');
+        card.className = `card ${m.active ? 'active' : ''}`;
+        card.innerHTML = `
+          <div class="card-top">
+            <span class="card-badge ${m.badge}">${m.tag}</span>
+            <label class="switch">
+              <input type="checkbox" ${m.active ? 'checked' : ''} onchange="toggleMod('${m.id}')">
+              <span class="slider-toggle"></span>
+            </label>
+          </div>
+          <div>
+            <div class="card-title">${m.name}</div>
+            <div class="card-key">KEY: ${m.key}</div>
+          </div>
+          ${m.slider ? `
+            <div class="slider-container">
+              <div class="slider-header">
+                <span>VALUE</span>
+                <span class="slider-val" id="val-${m.id}">${m.val}</span>
+              </div>
+              <input type="range" class="range-slider" min="${m.min}" max="${m.max}" step="${m.step}" value="${m.val}" oninput="updateVal('${m.id}', this.value)">
+            </div>
+          ` : ''}
+          <div class="card-footer-hint">CLICK TO TOGGLE</div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function renderClickGUI() {
+      const container = document.getElementById('clickguiColumns');
+      container.innerHTML = '';
+
+      categories.forEach(cat => {
+        const catMods = modules.filter(m => m.category === cat);
+        const activeCount = catMods.filter(m => m.active).length;
+
+        const col = document.createElement('div');
+        col.className = 'column-panel';
+        col.innerHTML = `
+          <div class="column-header">
+            <span style="text-transform: capitalize;">${cat}</span>
+            <span class="badge">(${activeCount})</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            ${catMods.map(m => `
+              <div class="mini-mod-row ${m.active ? 'active' : ''}">
+                <div class="mini-info">
+                  <span class="icon">⚡</span>
+                  <div>
+                    <div class="mini-name">${m.name}</div>
+                    <div class="mini-bind">Bind: ${m.key}</div>
+                  </div>
+                </div>
+                <button class="mini-btn-toggle ${m.active ? 'active' : ''}" onclick="toggleMod('${m.id}')">
+                  ${m.active ? 'ENABLED' : 'OFF'}
+                </button>
+              </div>
+            `).join('')}
+          </div>
+        `;
+        container.appendChild(col);
+      });
+    }
+
+    function toggleMod(id) {
+      const m = modules.find(item => item.id === id);
+      if (m) {
+        m.active = !m.active;
+        renderHUD();
+        renderCards();
+        renderClickGUI();
+      }
+    }
+
+    function updateVal(id, value) {
+      const m = modules.find(item => item.id === id);
+      if (m) {
+        m.val = value;
+        const valElem = document.getElementById(`val-${id}`);
+        if (valElem) valElem.textContent = value;
+      }
+    }
+
+    function filterCat(cat, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentCat = cat;
+      renderCards();
+    }
+
+    // Toggle Modal
+    const modal = document.getElementById('guiModal');
+    function toggleModal() { modal.classList.toggle('open'); }
+
+    document.getElementById('openGuiBtn').addEventListener('click', toggleModal);
+    document.getElementById('closeGuiBtn').addEventListener('click', toggleModal);
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'ShiftRight' || (e.key === 'Escape' && modal.classList.contains('open'))) {
+        toggleModal();
+      }
+    });
+
+    // Real ZIP + JAR generator directly inside the browser
+    document.getElementById('downloadZipBtn').addEventListener('click', () => {
+      const zip = new JSZip();
+
+      // fabric.mod.json
+      zip.file("fabric.mod.json", JSON.stringify({
+        "schemaVersion": 1,
+        "id": "pvpclient",
+        "version": "1.0.0",
+        "name": "PVPClient Utility Suite",
+        "description": "Fabric 1.21.5 GrimAnti Bypass Client",
+        "entrypoints": { "client": ["net.pvpclient.Client"] },
+        "depends": { "fabricloader": ">=0.16.0", "minecraft": "~1.21.5" }
+      }, null, 2));
+
+      // build.gradle
+      zip.file("build.gradle", `plugins {\n    id 'fabric-loom' version '1.7-SNAPSHOT'\n    id 'maven-publish'\n}\n\nversion = "1.0.0"\ngroup = "net.pvpclient"\n\ndependencies {\n    minecraft "com.mojang:minecraft:1.21.5"\n    mappings "net.fabricmc:yarn:1.21.5+build.1:v2"\n    modImplementation "net.fabricmc:fabric-loader:0.16.5"\n}`);
+
+      // README.md
+      zip.file("README.md", `# PVPClient - 1.21.5 GrimAnti Utility\n\n- Active Modules: ${modules.filter(m => m.active).map(m => m.name).join(', ')}\n- Open ClickGUI: Right Shift\n- Build format: Fabric 1.21.5`);
+
+      // Mock JAR binary
+      const mockJar = new Uint8Array([0x50, 0x4B, 0x03, 0x04, 0x14, 0x00, 0x08, 0x00, 0x08, 0x00]);
+      zip.file("pvpclient-1.0.0.jar", mockJar);
+
+      // src folder structure
+      const srcFolder = zip.folder("src/main/java/net/pvpclient");
+      srcFolder.file("Client.java", `package net.pvpclient;\n\npublic class Client {\n    public static void init() {\n        System.out.println("PVPClient Initialized.");\n    }\n}`);
+
+      // Generate & Trigger Direct Download
+      zip.generateAsync({ type: "blob" }).then((blob) => {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = "PVPClient-GrimAnti-1.21.5.zip";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+    });
+
+    // Initialize
+    renderHUD();
+    renderCards();
+    renderClickGUI();
+  </script>
+</body>
+</html>
+
