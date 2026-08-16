@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>PVPCLIENT - Next-Gen Utility Suite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #080c11;
+      --card-bg: #0e151e;
+      --card-border: #172230;
+      --card-hover: #131c28;
+      --accent: #10b981;
+      --accent-hover: #34d399;
+      --accent-glow: rgba(16, 185, 129, 0.3);
+      --accent-subtle: rgba(16, 185, 129, 0.1);
+      --text: #f8fafc;
+      --text-muted: #8293a7;
+      --font-ui: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-ui);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Navbar */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.9rem 1.75rem;
+      background: rgba(8, 12, 17, 0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--card-border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      background: linear-gradient(135deg, #10b981, #059669);
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.15rem;
+      color: #fff;
+      box-shadow: 0 0 16px var(--accent-glow);
+    }
+
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-badge {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      background: var(--accent-subtle);
+      color: var(--accent);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 0.65rem;
+    }
+
+    .btn {
+      cursor: pointer;
+      font-family: var(--font-ui);
+      font-weight: 700;
+      font-size: 0.82rem;
+      padding: 0.55rem 1.15rem;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      text-decoration: none;
+    }
+
+    .btn-secondary {
+      background: #131b26;
+      color: #94a3b8;
+      border-color: var(--card-border);
+    }
+
+    .btn-secondary:hover {
+      background: #1c2737;
+      color: #fff;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #042518;
+      box-shadow: 0 0 16px var(--accent-glow);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    /* Hero Section */
+    .hero-container {
+      max-width: 1200px;
+      margin: 2rem auto 1rem;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .pill-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--accent-subtle);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: var(--accent);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 0.85rem;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.8px;
+      margin-bottom: 0.85rem;
+      text-transform: uppercase;
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    /* HUD Box */
+    .hud-box {
+      background: #0a1017;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      font-family: var(--font-mono);
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+    }
+
+    .hud-header {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      border-bottom: 1px solid #141f2c;
+      padding-bottom: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .hud-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+      min-height: 130px;
+    }
+
+    .hud-list div {
+      text-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    .hud-stats {
+      margin-top: 0.85rem;
+      display: flex;
+      gap: 1rem;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      border-top: 1px solid #141f2c;
+      padding-top: 0.65rem;
+    }
+
+    .hud-stats strong {
+      color: var(--accent);
+    }
+
+    /* Controls & Search */
+    .modules-section {
+      max-width: 1200px;
+      margin: 1rem auto 3rem;
+      padding: 0 1.5rem;
+      width: 100%;
+    }
+
+    .controls-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 0.85rem;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0.4rem;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 0.45rem 1rem;
+      font-weight: 600;
+      font-size: 0.85rem;
+      border-radius: 7px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: #141c27;
+      color: #fff;
+      border-color: #212e3e;
+    }
+
+    .search-input {
+      background: #0e151e;
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 0.45rem 0.85rem;
+      border-radius: 7px;
+      font-family: var(--font-ui);
+      font-size: 0.85rem;
+      outline: none;
+      width: 200px;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+    }
+
+    /* Module Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.15rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 0.85rem;
+      transition: all 0.2s ease;
+    }
+
+    .card.active {
+      border-color: rgba(16, 185, 129, 0.45);
+      background: #111a24;
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.08);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .card-tag {
+      font-size: 0.65rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      padding: 0.2rem 0.45rem;
+      border-radius: 4px;
+      background: #16202c;
+      color: #94a3b8;
+    }
+
+    .card-tag.highlight {
+      background: var(--accent-subtle);
+      color: var(--accent);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-top: 0.25rem;
+    }
+
+    .card-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Switch Component */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: #1a2432;
+      border-radius: 24px;
+      transition: 0.3s;
+      border: 1px solid #233144;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+
+    input:checked + .slider {
+      background-color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
+    /* ClickGUI Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 1rem;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .gui-window {
+      background: #0b1118;
+      border: 1px solid #233144;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 680px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+      overflow: hidden;
+    }
+
+    .gui-titlebar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid #162230;
+    }
+
+    .gui-body {
+      padding: 1.25rem;
+      overflow-y: auto;
+    }
+
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    /* Notification Toast */
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: #111a24;
+      border: 1px solid var(--accent);
+      color: #fff;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 200;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+      .navbar { padding: 0.75rem 1rem; flex-wrap: wrap; }
+      .hero-container { grid-template-columns: 1fr; margin-top: 1rem; }
+      .hero h1 { font-size: 1.9rem; }
+      .brand-badge { display: none; }
+      .search-input { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="brand">
+      <div class="brand-icon">P</div>
+      <div class="brand-title">PVPCLIENT</div>
+      <span class="brand-badge">GRIMANTI BYPASS • 1.21.5</span>
+    </div>
+    <div class="nav-actions">
+      <button class="btn btn-secondary" id="openGuiBtn">CLICKGUI (R-SHIFT)</button>
+      <button class="btn btn-primary" id="downloadBtn">DOWNLOAD .ZIP + .JAR</button>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main>
+    <div class="hero-container">
+      <div class="hero">
+        <div class="pill-tag">GrimAnti Bypasses Ready</div>
+        <h1>PVP Utility Suite</h1>
+        <p>Real-time client configurations with dynamic Arraylist HUD, automated Grim checks avoidance, and custom packet algorithms.</p>
+      </div>
+      <div class="hud-box">
+        <div class="hud-header">
+          <span>ACTIVE MODULES HUD</span>
+          <span>ARRAYLIST</span>
+        </div>
+        <div class="hud-list" id="hudList"></div>
+        <div class="hud-stats">
+          <span>FPS: <strong>144</strong></span>
+          <span>PING: <strong>18ms</strong></span>
+          <span>BPS: <strong>12.4</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modules Controls & Search -->
+    <section class="modules-section">
+      <div class="controls-bar">
+        <div class="tabs">
+          <button class="tab-btn active" onclick="filterCategory('all', this)">All</button>
+          <button class="tab-btn" onclick="filterCategory('combat', this)">Combat</button>
+          <button class="tab-btn" onclick="filterCategory('movement', this)">Movement</button>
+          <button class="tab-btn" onclick="filterCategory('render', this)">Render</button>
+          <button class="tab-btn" onclick="filterCategory('world', this)">World</button>
+        </div>
+        <input type="text" class="search-input" id="searchBox" placeholder="Search modules..." oninput="handleSearch()" />
+      </div>
+
+      <div class="grid" id="moduleGrid"></div>
+    </section>
+  </main>
+
+  <!-- ClickGUI Modal -->
+  <div class="modal-overlay" id="guiModal">
+    <div class="gui-window">
+      <div class="gui-titlebar">
+        <h3>Client ClickGUI (Right Shift)</h3>
+        <button class="close-btn" id="closeGuiBtn">&times;</button>
+      </div>
+      <div class="gui-body">
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.25rem;">
+          Toggle settings dynamically. Press <kbd>Right Shift</kbd> or <kbd>ESC</kbd> to exit.
+        </p>
+        <div class="grid" id="guiList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toastMsg">Config downloaded successfully!</div>
+
+  <script>
+    const modules = [
+      { id: 'killaura', name: 'KillAura', category: 'combat', tag: 'CRIT-BYPASS', desc: 'Attacks valid targets automatically with rotation prediction.', active: true },
+      { id: 'autocrystal', name: 'AutoCrystal', category: 'combat', tag: 'FAST-PLACE', desc: 'Calculates crystal break & place intervals dynamically.', active: true },
+      { id: 'autoanchor', name: 'AutoAnchor', category: 'combat', tag: 'STABLE', desc: 'Automatically charges and explodes respawn anchors.', active: false },
+      { id: 'velocity', name: 'Velocity', category: 'combat', tag: '0-PACKET', desc: 'Modifies velocity packets to remove vertical knockback.', active: true },
+      { id: 'reach', name: 'Reach', category: 'combat', tag: 'BYPASS 3.4B', desc: 'Extends attack radius while remaining within server bounds.', active: false },
+      { id: 'speed', name: 'Speed', category: 'movement', tag: 'B-HOP', desc: 'Optimized strafe jump packets for Minecraft 1.21.', active: false },
+      { id: 'step', name: 'Step', category: 'movement', tag: '1.5 BLOCK', desc: 'Instantly steps up whole blocks smoothly.', active: false },
+      { id: 'esp', name: 'Player ESP', category: 'render', tag: 'GLOW/BOX', desc: 'Highlights enemy player models through walls.', active: true },
+      { id: 'nametags', name: 'Nametags', category: 'render', tag: 'ENCHANTS', desc: 'Displays health, armor durability, and ping overhead.', active: true },
+      { id: 'fastplace', name: 'FastPlace', category: 'world', tag: '0-TICK', desc: 'Eliminates block placement delays for high-speed bridging.', active: false }
+    ];
+
+    const grid = document.getElementById('moduleGrid');
+    const hud = document.getElementById('hudList');
+    const guiList = document.getElementById('guiList');
+    const modal = document.getElementById('guiModal');
+    let currentFilter = 'all';
+    let searchTerm = '';
+
+    function renderHUD() {
+      hud.innerHTML = '';
+      modules.filter(m => m.active).forEach(m => {
+        const item = document.createElement('div');
+        item.textContent = `> ${m.name}`;
+        hud.appendChild(item);
+      });
+    }
+
+    function createCardHTML(m) {
+      return `
+        <div class="card ${m.active ? 'active' : ''}">
+          <div class="card-top">
+            <div>
+              <span class="card-tag ${m.tag.includes('BYPASS') || m.tag.includes('CRIT') ? 'highlight' : ''}">${m.tag}</span>
+              <div class="card-title">${m.name}</div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" ${m.active ? 'checked' : ''} onchange="toggleModule('${m.id}')">
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="card-desc">${m.desc}</div>
+        </div>
+      `;
+    }
+
+    function renderModules() {
+      grid.innerHTML = '';
+      const list = modules.filter(m => {
+        const matchesCategory = currentFilter === 'all' || m.category === currentFilter;
+        const matchesSearch = m.name.toLowerCase().includes(searchTerm) || m.desc.toLowerCase().includes(searchTerm);
+        return matchesCategory && matchesSearch;
+      });
+
+      list.forEach(m => grid.innerHTML += createCardHTML(m));
+
+      guiList.innerHTML = '';
+      modules.forEach(m => guiList.innerHTML += createCardHTML(m));
+    }
+
+    function toggleModule(id) {
+      const item = modules.find(m => m.id === id);
+      if (item) {
+        item.active = !item.active;
+        renderHUD();
+        renderModules();
+      }
+    }
+
+    function filterCategory(cat, el) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      el.classList.add('active');
+      currentFilter = cat;
+      renderModules();
+    }
+
+    function handleSearch() {
+      searchTerm = document.getElementById('searchBox').value.toLowerCase();
+      renderModules();
+    }
+
+    function toggleGUI() {
+      modal.classList.toggle('open');
+    }
+
+    // Dynamic File Generator (Builds real file in browser on tap)
+    function generateAndDownloadFile() {
+      const activeMods = modules.filter(m => m.active).map(m => m.name);
+      
+      const configData = {
+        client_name: "PVPCLIENT Utility Suite",
+        version: "1.21.5",
+        anti_cheat_target: "GrimAnti Bypass",
+        created_at: new Date().toISOString(),
+        active_modules: activeMods,
+        modules_config: modules.map(m => ({
+          module: m.name,
+          category: m.category,
+          enabled: m.active,
+          tag: m.tag
+        }))
+      };
+
+      const fileContent = JSON.stringify(configData, null, 2);
+      const blob = new Blob([fileContent], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "pvpclient_config_1.21.5.json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast("Config package generated & downloaded!");
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastMsg');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    document.getElementById('openGuiBtn').addEventListener('click', toggleGUI);
+    document.getElementById('closeGuiBtn').addEventListener('click', toggleGUI);
+    document.getElementById('downloadBtn').addEventListener('click', generateAndDownloadFile);
+
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'ShiftRight' || (e.key === 'Escape' && modal.classList.contains('open'))) {
+        toggleGUI();
+      }
+    });
+
+    renderHUD();
+    renderModules();
+  </script>
+</body>
+</html>
+
